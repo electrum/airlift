@@ -2,6 +2,7 @@
 
 - Make HTTP client response headers case insensitive
 - Enable HTTP/2 support in HTTP server for HTTP (not HTTPS)
+- Add HTTP/2 support in HTTP client for HTTP (off by default)
 
 * 0.126
 
