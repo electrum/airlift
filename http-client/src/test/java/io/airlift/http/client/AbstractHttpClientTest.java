@@ -3,6 +3,7 @@ package io.airlift.http.client;
 import com.google.common.collect.ImmutableList;
 import io.airlift.http.client.HttpClient.HttpResponseFuture;
 import io.airlift.http.client.StatusResponseHandler.StatusResponse;
+import io.airlift.http.client.StringResponseHandler.StringResponse;
 import io.airlift.http.client.jetty.JettyHttpClient;
 import io.airlift.log.Logging;
 import io.airlift.testing.Closeables;
@@ -15,6 +16,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -52,6 +54,7 @@ import static com.google.common.base.Throwables.propagate;
 import static com.google.common.base.Throwables.propagateIfInstanceOf;
 import static com.google.common.base.Throwables.propagateIfPossible;
 import static com.google.common.net.HttpHeaders.ACCEPT_ENCODING;
+import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static io.airlift.concurrent.Threads.threadsNamed;
 import static io.airlift.http.client.Request.Builder.prepareDelete;
 import static io.airlift.http.client.Request.Builder.prepareGet;
@@ -60,6 +63,7 @@ import static io.airlift.http.client.Request.Builder.preparePut;
 import static io.airlift.http.client.StatusResponseHandler.createStatusResponseHandler;
 import static io.airlift.http.client.StringResponseHandler.createStringResponseHandler;
 import static io.airlift.testing.Assertions.assertBetweenInclusive;
+import static io.airlift.testing.Assertions.assertGreaterThanOrEqual;
 import static io.airlift.testing.Assertions.assertLessThan;
 import static io.airlift.testing.Closeables.closeQuietly;
 import static io.airlift.units.Duration.nanosSince;
@@ -143,6 +147,7 @@ public abstract class AbstractHttpClientTest
 
         ServletHolder servletHolder = new ServletHolder(servlet);
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+        context.setGzipHandler(new GzipHandler());
         context.addServlet(servletHolder, "/*");
         HandlerCollection handlers = new HandlerCollection();
         handlers.addHandler(context);
@@ -626,6 +631,16 @@ public abstract class AbstractHttpClientTest
         String body = executeRequest(request, createStringResponseHandler()).getBody();
         assertEquals(body, "");
         assertFalse(servlet.getRequestHeaders().containsKey(HeaderName.of(ACCEPT_ENCODING)));
+
+        String json = "{\"foo\":\"bar\",\"hello\":\"world\"}";
+        assertGreaterThanOrEqual(json.length(), GzipHandler.DEFAULT_MIN_GZIP_SIZE);
+
+        servlet.setResponseBody(json);
+        servlet.addResponseHeader(CONTENT_TYPE, "application/json");
+
+        StringResponse response = executeRequest(request, createStringResponseHandler());
+        assertEquals(response.getHeader(CONTENT_TYPE), "application/json");
+        assertEquals(response.getBody(), json);
     }
 
     private ExecutorService executor;
