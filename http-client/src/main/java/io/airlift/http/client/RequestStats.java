@@ -50,6 +50,7 @@ public class RequestStats
     {
     }
 
+    @SuppressWarnings("MissingCasesInEnumSwitch")
     public void recordResponseReceived(String method,
             int responseCode,
             long requestSizeInBytes,
