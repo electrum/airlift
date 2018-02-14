@@ -5,9 +5,6 @@ import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
-import org.glassfish.jersey.server.wadl.internal.WadlResource;
-import org.glassfish.jersey.server.wadl.processor.OptionsMethodProcessor;
-import org.glassfish.jersey.server.wadl.processor.WadlModelProcessor;
 
 import java.util.Collection;
 
@@ -56,6 +53,6 @@ public class JaxrsBinder
 
     public static Collection<Class<?>> getBuiltinResources()
     {
-        return ImmutableList.of(WadlResource.class, WadlModelProcessor.class, OptionsMethodProcessor.class);
+        return ImmutableList.of();
     }
 }

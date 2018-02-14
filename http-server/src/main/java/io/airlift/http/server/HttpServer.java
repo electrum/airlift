@@ -145,9 +145,6 @@ public class HttpServer
             baseHttpConfiguration.setResponseHeaderSize(toIntExact(config.getMaxResponseHeaderSize().toBytes()));
         }
 
-        // disable async error notifications to work around https://github.com/jersey/jersey/issues/3691
-        baseHttpConfiguration.setNotifyRemoteAsyncErrors(false);
-
         // register a channel listener if logging is enabled
         HttpServerChannelListener channelListener = null;
         if (config.isLogEnabled()) {
