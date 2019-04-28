@@ -1,6 +1,7 @@
 0.189
 
 - Move AsyncResponseHandler to JAX-RS module.
+- Update to Jersey 2.29.1.
 
 0.188
 
